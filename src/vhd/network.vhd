@@ -70,19 +70,20 @@ begin
             INNER_DEPTH_S_LIST: BMS_BUS;
 
             -- CONNECT THE BETWEEN SIGNALS TO THE IN SIGNALS CREATED ON COMP_SEQ
-            CON_SEQ_SIGNALS: for i in 0 to NETWORK_BUS_WIDTH generate
+            IN_SEQ_SIGNALS: for i in 0 to NETWORK_BUS_WIDTH generate
                 IN_SIG_i <= INNER_DEPTH_S_LIST(i);
-            end generate CON_SEQ_SIGNALS;
+            end generate IN_SEQ_SIGNALS;
         end generate INNER_SEQ;
 
         -- SIGNALS FOR THE OUTTER SEQUENCES
         OUTTER_DEPTH_S_LIST: BMS_BUS;
 
-        
+        -- CONNECT THE BETWEEN SIGNALS TO THE SIGNALS CREATED ON IN_SEQ_SIGNALS
+        NET_IN: if(OUTER_DEPTH_S = 0 and INNER_DEPTH_S = 0) generate
+            INNER_DEPTH_S_LIST <= NET_INPUT_P;
+        else
+            INNER_DEPTH_S_LIST <= OUTTER_DEPTH_S_LIST;
+        end generate NET_IN;
 
-            
-
-            NEXT_COMP_PM: Comparator port map()
-        
 end RTL;
  
