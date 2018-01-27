@@ -43,28 +43,44 @@ architecture RTL of BitonicSort is
  
 begin
 
-    OUTER_SEQ: while(not(OUTER_DEPTH_S = 0)) generate
+    OUTTER_SEQ: while(not(OUTER_DEPTH_S = 0)) generate
+
         INNER_SEQ: while(not(INNER_DEPTH_S = OUTER_DEPTH_S)) generate
+            -- SIGNALS FOR THE INNER SEQUENCES 
+
             COMP_SEQ: while(not(k = (NETWORK_BUS_WIDTH >> 1))) generate
 
+                -- CONNECTIONS FOR EACH COMPARATOR
                 NET_OUT: if(OUTER_DEPTH_S = LAST_DEPTH and INNER_DEPTH_S = 0) generate
                     IN_SIG_k: SORT_ELEMENT;
                     IN_SIG_(k+1): SORT_ELEMENT;
-                    COMP_PM_OUT: Comparator port map(IN_SIG_k, IN_SIG_(k+1), NET_OUTPUT_P(k), NET_OUTPUT_P(k+1))
+                    COMP_PM_OUT: Comparator port map(IN_SIG_k, IN_SIG_(k+1), NET_OUTPUT_P(k), NET_OUTPUT_P(k+1));
                 else
                     -- CREATE 4 SIGNALS FOR EACH NEW COMPARATOR
                     IN_SIG_k: SORT_ELEMENT;
-                    IN_SIG_(k+1): SORT_ELEMENT;
+                    IN_SIG_(k+INNER_DEPTH_S+1): SORT_ELEMENT;
                     OUT_SIG_k: SORT_ELEMENT;
-                    OUT_SIG_(k+1): SORT_ELEMENT;
+                    OUT_SIG_(k+INNER_DEPTH_S+1): SORT_ELEMENT;
 
-                    COMP_PM: Comparator port map(IN_SIG_k)
-
-                COMP_PM_OUT: Comparator port map(SIG(k), PREV_S_LIST(k+1))
-                SIG_k: SORT_ELEMENT;
-                SIG_(k+1): SORT_ELEMENT;
-                COMP_PM: Comparator port map(NET_INPUT_P(k), NET_INPUT_P(k+1), SIG_k, SIG_(k+1));
+                    COMP_PM: Comparator port map(IN_SIG_k. IN_SIG_(k+INNER_DEPTH_S+1), OUT_SIG_k, OUT_SIG_(k+INNER_DEPTH_S+1));
+                end generate NET_OUT;
             end generate COMP_SEQ;
+
+            -- SIGNALS FOR THE INNER SEQUENCES
+            INNER_DEPTH_S_LIST: BMS_BUS;
+
+            -- CONNECT THE BETWEEN SIGNALS TO THE IN SIGNALS CREATED ON COMP_SEQ
+            CON_SEQ_SIGNALS: for i in 0 to NETWORK_BUS_WIDTH generate
+                IN_SIG_i <= INNER_DEPTH_S_LIST(i);
+            end generate CON_SEQ_SIGNALS;
+        end generate INNER_SEQ;
+
+        -- SIGNALS FOR THE OUTTER SEQUENCES
+        OUTTER_DEPTH_S_LIST: BMS_BUS;
+
+        
+
+            
 
             NEXT_COMP_PM: Comparator port map()
         
