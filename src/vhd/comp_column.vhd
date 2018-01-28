@@ -33,15 +33,20 @@ architecture RTL of CompColumn is
         );
     end component Comparator;
 
-    signal STEP_S: INTEGER := 0;
+    signal COMP_STEP_S: INTEGER := 0;
 
 begin
-    COL_CONNECT: while(not(STEP_S = NUM_INPUTS >> 1)) generate
+    COL_CONNECT: while(not(COMP_STEP_S = NUM_INPUTS >> 1)) generate
         COMP_GEN: Comparator port map(
-            C_INP1_P => CC_INP_P(STEP_S),
-            C_INP2_P => CC_INP_P(STEP_S + (2 << CURRENT_DEPTH)),
-            C_OUT1_P => CC_OUT_P(STEP_S),
-            C_OUT2_P => CC_OUT_P(STEP_S + (2 << CURRENT_DEPTH))
+            C_INP1_P => CC_INP_P(COMP_STEP_S),
+            C_INP2_P => CC_INP_P(COMP_STEP_S + (2 << CURRENT_DEPTH)),
+            C_OUT1_P => CC_OUT_P(COMP_STEP_S),
+            C_OUT2_P => CC_OUT_P(COMP_STEP_S + (2 << CURRENT_DEPTH))
         );
-        STEP_S <= STEP_S + 1;
+        
+        UPDATE_STEP: if((COMP_STEP_S mod (2 << (CURRENT_DEPTH - 1))) = 0) generate
+            COMP_STEP_S <= COMP_STEP_S + (2 << (CURRENT_DEPTH + 1));
+        else
+            COMP_STEP_S <= COMP_STEP_S + 1;
+        end generate UPDATE_STEP;
 end RTL;
