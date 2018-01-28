@@ -15,7 +15,7 @@ use WORK.COMMON.ALL;
 
 entity CompColumn is
     generic(OUTER_DEPTH: INTEGER := 1);
-    generic(CURRENT_DEPTH: INTEGER := 1);
+    generic(INNER_DEPTH: INTEGER := 1);
     generic(NUM_INPUTS: INTEGER := 16);
     port(
         CC_INP_P: in BMS_BUS;
@@ -43,25 +43,25 @@ begin
         else
             DIRECTION <= DIRECTION;
         end generate TOGGLE_DIRECTION;
-        
+
         COL_CONNECT: while(not(COMP_STEP_S = NUM_INPUTS >> 1)) generate
             if(DIRECTION = '0')
                 COMP_GEN_DOWN: Comparator port map(
                     C_INP1_P => CC_INP_P(COMP_STEP_S),
-                    C_INP2_P => CC_INP_P(COMP_STEP_S + (2 << CURRENT_DEPTH)),
+                    C_INP2_P => CC_INP_P(COMP_STEP_S + (2 << INNER_DEPTH)),
                     C_OUT1_P => CC_OUT_P(COMP_STEP_S),
-                    C_OUT2_P => CC_OUT_P(COMP_STEP_S + (2 << CURRENT_DEPTH))
+                    C_OUT2_P => CC_OUT_P(COMP_STEP_S + (2 << INNER_DEPTH))
                 );
             else
                 COMP_GEN_UP: Comparator port map(
-                    C_INP1_P => CC_INP_P(COMP_STEP_S + (2 << CURRENT_DEPTH)),
+                    C_INP1_P => CC_INP_P(COMP_STEP_S + (2 << INNER_DEPTH)),
                     C_INP2_P => CC_INP_P(COMP_STEP_S),
-                    C_OUT1_P => CC_OUT_P(COMP_STEP_S + (2 << CURRENT_DEPTH)),
+                    C_OUT1_P => CC_OUT_P(COMP_STEP_S + (2 << INNER_DEPTH)),
                     C_OUT2_P => CC_OUT_P(COMP_STEP_S)
                 );
 
-            UPDATE_STEP: if((COMP_STEP_S mod (2 << (CURRENT_DEPTH - 1))) = 0) generate
-                COMP_STEP_S <= COMP_STEP_S + (2 << (CURRENT_DEPTH + 1));
+            UPDATE_STEP: if((COMP_STEP_S mod (2 << (INNER_DEPTH - 1))) = 0) generate
+                COMP_STEP_S <= COMP_STEP_S + (2 << (INNER_DEPTH + 1));
             else
                 COMP_STEP_S <= COMP_STEP_S + 1;
             end generate UPDATE_STEP;
