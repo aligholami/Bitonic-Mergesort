@@ -14,6 +14,7 @@ use IEEE.NUMERIC_STD.ALL;
 use WORK.COMMON.ALL;
 
 entity CompColumn is
+    generic(OUTER_DEPTH: INTEGER := 1);
     generic(CURRENT_DEPTH: INTEGER := 1);
     generic(NUM_INPUTS: INTEGER := 16);
     port(
@@ -34,19 +35,34 @@ architecture RTL of CompColumn is
     end component Comparator;
 
     signal COMP_STEP_S: INTEGER := 0;
+    signal DIRECTION: STD_LOGIC := '0'; -- 0 FOR DOWNWARD | 1 FOR UPWARD
 
 begin
-    COL_CONNECT: while(not(COMP_STEP_S = NUM_INPUTS >> 1)) generate
-        COMP_GEN: Comparator port map(
-            C_INP1_P => CC_INP_P(COMP_STEP_S),
-            C_INP2_P => CC_INP_P(COMP_STEP_S + (2 << CURRENT_DEPTH)),
-            C_OUT1_P => CC_OUT_P(COMP_STEP_S),
-            C_OUT2_P => CC_OUT_P(COMP_STEP_S + (2 << CURRENT_DEPTH))
-        );
-        
-        UPDATE_STEP: if((COMP_STEP_S mod (2 << (CURRENT_DEPTH - 1))) = 0) generate
-            COMP_STEP_S <= COMP_STEP_S + (2 << (CURRENT_DEPTH + 1));
+    TOGGLE_DIRECTION: if((2 << OUTER_DEPTH) mod COMP_STEP_S = 0) generate
+            DIRECTION <= not DIRECTION;
         else
-            COMP_STEP_S <= COMP_STEP_S + 1;
-        end generate UPDATE_STEP;
+            DIRECTION <= DIRECTION;
+        end generate TOGGLE_DIRECTION;
+        
+        COL_CONNECT: while(not(COMP_STEP_S = NUM_INPUTS >> 1)) generate
+            if(DIRECTION = '0')
+                COMP_GEN_DOWN: Comparator port map(
+                    C_INP1_P => CC_INP_P(COMP_STEP_S),
+                    C_INP2_P => CC_INP_P(COMP_STEP_S + (2 << CURRENT_DEPTH)),
+                    C_OUT1_P => CC_OUT_P(COMP_STEP_S),
+                    C_OUT2_P => CC_OUT_P(COMP_STEP_S + (2 << CURRENT_DEPTH))
+                );
+            else
+                COMP_GEN_UP: Comparator port map(
+                    C_INP1_P => CC_INP_P(COMP_STEP_S + (2 << CURRENT_DEPTH)),
+                    C_INP2_P => CC_INP_P(COMP_STEP_S),
+                    C_OUT1_P => CC_OUT_P(COMP_STEP_S + (2 << CURRENT_DEPTH)),
+                    C_OUT2_P => CC_OUT_P(COMP_STEP_S)
+                );
+
+            UPDATE_STEP: if((COMP_STEP_S mod (2 << (CURRENT_DEPTH - 1))) = 0) generate
+                COMP_STEP_S <= COMP_STEP_S + (2 << (CURRENT_DEPTH + 1));
+            else
+                COMP_STEP_S <= COMP_STEP_S + 1;
+            end generate UPDATE_STEP;
 end RTL;
