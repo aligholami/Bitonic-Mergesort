@@ -6,6 +6,6 @@ A generic implementation of **Bitonic mergesort** on the **Xillinx Zynq 7010** u
 </p>
 
 <p align="center"> 
-    **i.e.** A bitonic sorting network with 16 inputs
+    i.e. A bitonic sorting network with 16 inputs
 </p>
 <br/>
